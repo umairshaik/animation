@@ -1,4 +1,4 @@
-import 'dart:ffi';
+import 'dart:math';
 
 import 'package:animation/src/widgets/cat.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +11,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  late Animation<double> catAnimation;
   late AnimationController catController;
+  late Animation<double> catAnimation;
+
+  late AnimationController boxController;
+  late Animation<double> boxAnimaiton;
 
   @override
   void initState() {
@@ -27,13 +30,35 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         curve: Curves.easeIn,
       ),
     );
+
+    boxController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    boxAnimaiton = Tween(begin: pi * 0.6, end: pi * 0.65).animate(
+      CurvedAnimation(
+        parent: boxController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    boxAnimaiton.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        boxController.reverse();
+      } else if (status == AnimationStatus.dismissed) {
+        boxController.forward();
+      }
+    });
+    boxController.forward();
   }
 
   void onTap() {
     if (catAnimation.status == AnimationStatus.completed) {
       catController.reverse();
+      boxController.forward();
     } else if (catAnimation.status == AnimationStatus.dismissed) {
       catController.forward();
+      boxController.stop();
     }
   }
 
@@ -49,6 +74,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             children: [
               buildCatAnimation(),
               buildBox(),
+              buildLeftFlap(),
+              buildRightFlap(),
             ],
           ),
         ),
@@ -76,6 +103,48 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       height: 200.0,
       width: 200.0,
       color: Colors.brown,
+    );
+  }
+
+  Widget buildLeftFlap() {
+    return Positioned(
+      left: 3.0,
+      child: AnimatedBuilder(
+        animation: boxAnimaiton,
+        child: Container(
+          width: 125.0,
+          height: 10.0,
+          color: Colors.brown,
+        ),
+        builder: (context, child) {
+          return Transform.rotate(
+            angle: boxAnimaiton.value,
+            alignment: Alignment.topLeft,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildRightFlap() {
+    return Positioned(
+      right: 3.0,
+      child: AnimatedBuilder(
+        animation: boxAnimaiton,
+        child: Container(
+          width: 125.0,
+          height: 10.0,
+          color: Colors.brown,
+        ),
+        builder: (context, child) {
+          return Transform.rotate(
+            angle: -boxAnimaiton.value,
+            alignment: Alignment.topRight,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
