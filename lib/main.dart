@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import 'src/app.dart';
 
 void main() {
-  runApp(const MyApp());
+  debugPaintSizeEnabled = true;
+  runApp(const App());
 }
 
 class MyApp extends StatelessWidget {
